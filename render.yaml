@@ -7,12 +7,12 @@ databases:
 services:
   - type: web
     name: user-management-api
-    runtime: docker
+    runtime: python
     plan: free
     repo: https://github.com/komal2605-2026/playground
     branch: main
-    dockerfilePath: ./Dockerfile
-    dockerCommand: /app/entrypoint.sh
+    buildCommand: './build.sh'
+    startCommand: 'gunicorn playground.wsgi:application --bind 0.0.0.0:$PORT --workers 4'
     envVars:
       - key: DATABASE_URL
         fromDatabase:

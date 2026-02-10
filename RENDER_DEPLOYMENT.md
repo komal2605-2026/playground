@@ -1,6 +1,6 @@
 # Deploy Django User Management API to Render.com
 
-This guide walks you through deploying your Dockerized Django application to Render.com for public access.
+This guide walks you through deploying your Django application to Render.com for public access.
 
 ## What Changed for Render Deployment
 
@@ -10,16 +10,25 @@ We made these modifications to make your app work on Render:
    - Now uses `DATABASE_URL` environment variable (Render's standard)
    - Falls back to individual `DB_*` variables for local Docker
    - Added `RENDER_EXTERNAL_HOSTNAME` to `ALLOWED_HOSTS`
+   - Added WhiteNoise middleware for serving static files
+   - Configured static files storage for production
 
-2. **Updated [entrypoint.sh](entrypoint.sh)**:
-   - Handles both `DATABASE_URL` (Render) and `DB_HOST` (local Docker)
-   - Uses `PORT` environment variable that Render provides
-   - Binds Gunicorn to `0.0.0.0:$PORT` instead of hardcoded `8000`
+2. **Created [build.sh](build.sh)**:
+   - Installs dependencies
+   - Collects static files
+   - Runs database migrations
+   - Executed by Render before starting the app
 
-3. **Created [render.yaml](render.yaml)**:
+3. **Updated [requirements.txt](requirements.txt)**:
+   - Added `dj-database-url` for DATABASE_URL parsing
+   - Added `whitenoise` for static file serving
+   - All dependencies needed for Render deployment
+
+4. **Created [render.yaml](render.yaml)**:
    - Infrastructure-as-code for one-click deployment
    - Defines PostgreSQL database + web service
    - Auto-generates secrets and configures DATABASE_URL
+   - Uses native Python runtime (not Docker) for simplicity
 
 ## Prerequisites
 
@@ -125,10 +134,10 @@ curl https://your-app-name.onrender.com/api/users/
    - **Name**: `user-management-api`
    - **Region**: Same as database
    - **Branch**: `main`
-   - **Language**: `Docker`
+   - **Language**: `Python 3`
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `gunicorn playground.wsgi:application --bind 0.0.0.0:$PORT --workers 4`
    - **Plan**: Free
-
-4. Leave **Docker Command** empty (uses Dockerfile CMD)
 
 ### Step 3: Set Environment Variables
 
