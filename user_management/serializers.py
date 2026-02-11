@@ -21,7 +21,7 @@ class LoginSerializer(serializers.Serializer):
 class RefreshSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
     def validate_refresh_token(self, value):
-        # Only normalize the token here (strip optional 'Bearer ')
+        
         if isinstance(value, str) and value.startswith('Bearer '):
             value = value.split(' ', 1)[1].strip()
         return value
